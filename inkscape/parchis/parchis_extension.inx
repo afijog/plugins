@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <name>Parchís</name>
+  <id>es.massimple.inkscape.extension.parchis</id>
+
+  <param name="useLaser" type="boolean" gui-text="Use laser (only outline)">true</param>
+  <param name="notebook" type="notebook">
+      <page name="pageSizes" gui-text="Sizes">
+        <param name="units" indent="1" type="optiongroup" appearance="radio" gui-text="Units:">
+            <option value="cm">cm</option>
+            <option value="in">in</option>
+        </param>
+        <param name="boardSize" indent="1" type="float" appearance="full" precision="3"
+          min="5" max="60" gui-text="Board size">30.0</param>
+
+        <param name="boardMargin" indent="1" type="float" appearance="full" precision="3"
+          min="0" max="40" gui-text="Board margin">0.0</param>
+
+        <param name="strokeWidth" indent="1" type="float" appearance="full" precision="3"
+          min="0.1" max="6" gui-text="Stroke width">0.1</param>
+      </page>
+
+      <page name="pageBoard" gui-text="Game">
+        <param name="nPlayers" type="optiongroup" appearance="option" gui-text="Number of players:">
+            <option value="4">4 players</option>
+            <option value="5">5 players</option>
+            <option value="6">6 players</option>
+            <option value="7">7 players</option>
+            <option value="8">8 players</option>
+        </param>
+
+        <separator />
+
+        <param name="nColumns" type="optiongroup" appearance="option" gui-text="Number of columns:">
+            <option value="3">3 columns</option
+            <option value="5">5 columns</option>
+        </param>
+
+        <separator />
+
+        <param name="nBoxesPerColumn" type="optiongroup" appearance="option" gui-text="Size of column:">
+            <option value="8"> 8 boxes</option
+            <option value="10">10 boxes</option>
+            <option value="15">15 boxes</option>
+        </param>
+
+        <separator />
+
+        <param name="generateCenter" type="boolean" gui-text="Generate Center">true</param>
+        <param name="generateNumbers" type="boolean" gui-text="Generate Numbers">true</param>
+      </page>
+
+      <page name="pageColors" gui-text="Colors">
+        <label appearance="header">Board fill color</label>
+        <param name="fillColor" gui-text="Board fill color" type="color"></param>
+      </page>
+
+  </param>
+
+  <effect>
+    <effects-menu>
+      <submenu name="Parchís"/>
+    </effects-menu>
+  </effect>
+  <script>
+    <command location="inx" interpreter="python">parchis_extension.py</command>
+  </script>
+</inkscape-extension>
