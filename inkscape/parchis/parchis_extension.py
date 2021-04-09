@@ -47,8 +47,9 @@ class ParchisEffectExtension(inkex.GenerateExtension):
         pars.add_argument("--nPlayers", type=int, help="The number of players")
         pars.add_argument("--nColumns", type=int, help="The number of columns")
         pars.add_argument("--nBoxesPerColumn", type=int, help="The number of boxes per column")
-        pars.add_argument("--generateCenter", type=inkex.Boolean, help="Generate Center")
-        pars.add_argument("--generateNumbers", type=inkex.Boolean, help="Generate Numbers")
+        pars.add_argument("--generateCenter", type=inkex.Boolean, help="Generate center")
+        pars.add_argument("--generateNumbers", type=inkex.Boolean, help="Generate numbers")
+        pars.add_argument("--useImages", type=inkex.Boolean, help="Use images")
 
         pars.add_argument("--fillColor", type=str, help="Fill color")
 
@@ -99,10 +100,12 @@ class ParchisEffectExtension(inkex.GenerateExtension):
 
         return textElement
 
-    def generateSectors(self, nBoxesPerColumn, nColumns, boardSize, boardMargin, strokeWidth, stroke):
+    def generateSectors(self, nBoxesPerColumn, nColumns, boardSize, boardMargin,
+            strokeWidth, stroke, homeSafeStroke):
         sectors = Group.new('sectors')
         for nSector in range(self.nPlayers):
-            sector = self.generateSector(nSector, nBoxesPerColumn, nColumns, boardSize, strokeWidth, stroke)
+            sector = self.generateSector(nSector, nBoxesPerColumn, nColumns,
+                boardSize, strokeWidth, stroke, homeSafeStroke)
             sectors.add(sector)
 
         ((x1, x2), (y1, y2)) = sectors.bounding_box()
@@ -121,7 +124,8 @@ class ParchisEffectExtension(inkex.GenerateExtension):
         return sectors
 
     def generateSector(self, nSector,
-            nBoxesPerColumn, nColumns, size, strokeWidth, stroke):
+            nBoxesPerColumn, nColumns, size, strokeWidth, stroke,
+            homeSafeStroke):
         xBoxSize = size / 9
         yBoxSize = size / (3 * (nBoxesPerColumn-1))
 
@@ -208,7 +212,7 @@ class ParchisEffectExtension(inkex.GenerateExtension):
             return secureCircles
 
         # Home Circle
-        def generateHomeCircle():
+        def generateHomeCircle(sizeFactor, stroke):
             homeCircleX1 = -initialX
             homeCircleY1 = yBoxSize
 
@@ -218,7 +222,7 @@ class ParchisEffectExtension(inkex.GenerateExtension):
             mediumPointX = (homeCircleX1 + homeCircleX2) / 2
             mediumPointY = (homeCircleY1 + homeCircleY2) / 2
 
-            r = (mediumPointX - homeCircleX1) * .9
+            r = (mediumPointX - homeCircleX1) * sizeFactor
             homeCircle = self.generateCircle(mediumPointX, mediumPointY, r,
                 strokeWidth, stroke, fillSecure, 'homeCircle-{}'.format(nSector + 1))
 
@@ -365,11 +369,12 @@ class ParchisEffectExtension(inkex.GenerateExtension):
         secureCircles = generateSecureCircles()
         sector.add(secureCircles)
 
-        # Home Circle
+        # Aux placer for images | Home Circle
+        homeCircleSizeFactor = (.9, 1)[self.useImages]
         isHomeBox = True
         fillSecure = getFillColor(isHomeBox, self.secureNotHomeBoxFillColor)
 
-        homeCircle = generateHomeCircle()
+        homeCircle = generateHomeCircle(homeCircleSizeFactor, homeSafeStroke)
         sector.add(homeCircle)
 
         # Numbers for boxes
@@ -390,6 +395,12 @@ class ParchisEffectExtension(inkex.GenerateExtension):
         boardMargin = self.svg.unittouu(str(self.options.boardMargin) + units)
 
         self.useLaser = self.options.useLaser
+        self.nPlayers = self.options.nPlayers
+        nBoxesPerColumn = self.options.nBoxesPerColumn
+        nColumns = self.options.nColumns
+        self.generateCenter = self.options.generateCenter
+        self.generateNumbers = self.options.generateNumbers
+        self.useImages = self.options.useImages
 
         fill = (self.getColorString(self.options.fillColor), 'none')[self.useLaser]
         # inkex.utils.debug(fill)
@@ -398,6 +409,7 @@ class ParchisEffectExtension(inkex.GenerateExtension):
 
         sectorStroke = ('black', 'red')[self.useLaser]
         boardStroke = ('gray', 'black')[self.useLaser]
+        homeSafeStroke = (sectorStroke, 'yellow')[self.useImages and self.useLaser]
 
         self.sectorColors = ['yellow', 'royalblue', 'red', 'green',
                              'orange', 'hotpink', 'gold', 'darkkhaki']
@@ -405,22 +417,17 @@ class ParchisEffectExtension(inkex.GenerateExtension):
         self.regularBoxFillColor = ('white', 'none')[self.useLaser]
         self.secureNotHomeBoxFillColor = 'gray'
 
-        self.nPlayers = self.options.nPlayers
-        nBoxesPerColumn = self.options.nBoxesPerColumn
-        nColumns = self.options.nColumns
-        self.generateCenter = self.options.generateCenter
-        self.generateNumbers = self.options.generateNumbers
-
         # Generate Board
         board = Group.new('board')
 
         # Generate Border
-        border = self.generateRectangle(0, 0, boardSize, boardSize, strokeWidth, boardStroke, fill, 'border')
+        border = self.generateRectangle(0, 0, boardSize, boardSize,
+            strokeWidth, boardStroke, fill, 'border')
         board.add(border)
 
         # Generate Sectors
         sectors = self.generateSectors(nBoxesPerColumn, nColumns,
-            boardSize, boardMargin, strokeWidth, sectorStroke)
+            boardSize, boardMargin, strokeWidth, sectorStroke, homeSafeStroke)
         board.add(sectors)
 
         return board

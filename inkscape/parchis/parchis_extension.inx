@@ -46,8 +46,9 @@
 
         <separator />
 
-        <param name="generateCenter" type="boolean" gui-text="Generate Center">true</param>
-        <param name="generateNumbers" type="boolean" gui-text="Generate Numbers">true</param>
+        <param name="generateCenter" type="boolean" gui-text="Generate center">true</param>
+        <param name="generateNumbers" type="boolean" gui-text="Generate numbers">true</param>
+        <param name="useImages" type="boolean" gui-text="Use images">false</param>
       </page>
 
       <page name="pageColors" gui-text="Colors">
